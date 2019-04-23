@@ -2,38 +2,45 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <math.h>
+#include <unistd.h>
 
 #define THREADS 3
-#define N 1E8
+#define N 1E9
 
-double at=0;
-double bt=1;
-double h;
+double start=0;
+double finish=1;
+double step;
 
-struct pth {int A,B;};
+typedef struct {double A,B;} pth;//replaced `int by `double
 
-double f(double x) {
-	return 4.0 / (1 + x*x);
+double atandiff(double x) {
+	return 1.0 / (1 + x*x);
 }
 
 void* thread_func(void* arg) {
-	struct pth *init = (struct pth *)arg;
+	pth *init = (pth*) arg;
 
 	double *S = (double*)malloc(sizeof(double));
 
-	for (int i = init->A; i < init->B; i++) {
-		*S = *S +0.5 * h * (f(i*h) + f((i+1)*h));
+	for (double x = init->A; x < init->B; x = x + step) {
+		*S = *S +0.5 * step * (atandiff(x) + atandiff(x+step));
 	}
 	printf("Sum is: %.10f\n",*S);
 	return S;
 }
 
 int main() {
-	h = (bt - at) / N;
+	step = (finish - start) / N;
 	double sum = 0;
-	struct pth args[THREADS];
+	pth args[THREADS];
 	pthread_t th[THREADS];
 	void *thread_return[THREADS];
+
+	for (int i = 0; i < THREADS; i++) {
+		args[i].A = start + (finish - start) / THREADS * i;
+		args[i].B = start + (finish - start) / THREADS * (i + 1);
+		pthread_create(&th[i], NULL, thread_func, (void*) &args[i]);
+	}
 
 	for(int i = 0; i < THREADS; i++) {
 		pthread_join(th[i], (&thread_return[i]));
@@ -44,8 +51,7 @@ int main() {
 	}
 
 	printf("SUM=%16.15f\n", sum);
-	printf("Precision=%16.15f\n", sum - M_PI);
+	printf("Precision=%16.15f\n", 4 * sum - M_PI);
 
 	return 0;
 }
-
