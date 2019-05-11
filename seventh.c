@@ -37,9 +37,7 @@ int main(int argc, char *argv[])
 	
 	#ifndef OPTION_DRY
 	
-	a = malloc(sizeof(double));
-	while( ( fscanf(matrix_file, "%lf",a) > 0 ) && ( element_count++ >= 0 ) );
-	free(a);
+	while( ( fscanf(matrix_file, "%*lf") > 0 ) && ( element_count++ >= 0 ) );
 	
 	matrix_dimension = (-1 + (long long) sqrtl(1 + 4*((long double) element_count)))/2;
 	element_count = matrix_dimension * ( matrix_dimension + 1 );
