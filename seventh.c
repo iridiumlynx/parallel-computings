@@ -8,7 +8,7 @@
 #include "omp.h"
 
 #define elem(arr,N,i,j) (arr)[(i)*(N) + (j)]
-#define a(i,j) elem(a,matrix_dimension+1,(i),(j))
+#define a(i,j) elem(a,(matrix_dimension) + 1,(i),(j))
 
 //Comment this to read matrix from file
 //instead of generating it using
@@ -21,7 +21,7 @@ int solve(int matrix_dimension, double* matrix, double* x);
 int main(int argc, char *argv[])
 {
 	FILE* matrix_file;
-	double* a = malloc(sizeof(double));
+	double* a;
 	double* x;
 	int element_count = 0;
 	int matrix_dimension = 0;
@@ -37,7 +37,9 @@ int main(int argc, char *argv[])
 	
 	#ifndef OPTION_DRY
 	
+	a = malloc(sizeof(double));
 	while( ( fscanf(matrix_file, "%lf",a) > 0 ) && ( element_count++ >= 0 ) );
+	free(a);
 	
 	matrix_dimension = (-1 + (long long) sqrtl(1 + 4*((long double) element_count)))/2;
 	element_count = matrix_dimension * ( matrix_dimension + 1 );
@@ -45,6 +47,7 @@ int main(int argc, char *argv[])
 	if( element_count < 2 )
 	{
 		puts("Invalid file.");
+		fclose(matrix_file);
 		return 3;
 	}
 	
@@ -53,6 +56,7 @@ int main(int argc, char *argv[])
 	if( a == NULL )
 	{
 		puts("Couldn't allocate memory");
+		fclose(matrix_file);
 		return 2;
 	}
 	
@@ -65,8 +69,11 @@ int main(int argc, char *argv[])
 	if( fscanf(matrix_file, "%d", &matrix_dimension) <= 0 )
 	{
 		puts("Invalid file.");
+		fclose(matrix_file);
 		return 3;
 	}
+	
+	fclose(matrix_file);
 	
 	a = (double*) calloc(matrix_dimension*(matrix_dimension+1),sizeof(double));
 	
@@ -88,15 +95,28 @@ int main(int argc, char *argv[])
 		return 2;
 	}
 	
-	solve(matrix_dimension, a, x);
+	if( !solve(matrix_dimension, a, x) )
+	{
+		free(a);
+		free(x);
+		return 4;
+	}
+	free(a);
 	
 	for( int i = 0 ; (printf("x[%d] = %lf\n",i,x[i]) > 0) && (i < matrix_dimension - 1) ; i++ );
+	free(x);
 	
 	return 0;
 }
 
+#undef a
+
+#define a(i,j) elem(a,matrix_dimension+1,(i),(j))
+
 int solve(int matrix_dimension, double* a, double* x)
 {
+	if( (matrix_dimension < 1) || (a == NULL) || (x == NULL) )
+		return 0;
 	
 	for( int i = 0; i < matrix_dimension - 1 ; i++ )
 	{
@@ -122,3 +142,5 @@ int solve(int matrix_dimension, double* a, double* x)
 	
 	return 1;
 }
+
+#undef a
