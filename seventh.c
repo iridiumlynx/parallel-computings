@@ -13,7 +13,7 @@
 //Comment this to read matrix from file
 //instead of generating it using
 //the dimension of matrix read from file
-#define OPTION_DRY
+//#define OPTION_DRY
 
 int main(int argc, char *argv[]);
 int solve(int matrix_dimension, double* matrix, double* x);
@@ -37,7 +37,8 @@ int main(int argc, char *argv[])
 	
 	#ifndef OPTION_DRY
 	
-	while( ( fscanf(matrix_file, "%*lf") > 0 ) && ( element_count++ >= 0 ) );
+	double _dummy = 0;
+	while( ( fscanf(matrix_file, "%lf", &_dummy) > 0 ) && ( element_count++ >= 0 ) );
 	
 	matrix_dimension = (-1 + (long long) sqrtl(1 + 4*((long double) element_count)))/2;
 	element_count = matrix_dimension * ( matrix_dimension + 1 );
