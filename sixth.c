@@ -51,7 +51,7 @@ using expression NUM as seed
 //Comment this to disable parallelism
 #define OPTION_PARALLEL
 
-//Comment this to use slow method for determining
+//Uncomment this to use slow method for determining
 //if a point is within a hemisphere
 //#define OPTION_SLOW
 
